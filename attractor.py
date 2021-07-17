@@ -11,7 +11,6 @@ class Attractor:
 
         self.dt = dt
 
-        self.locList = [(x,y,z)]
 
 
     def get_location(self):
@@ -19,9 +18,3 @@ class Attractor:
 
     def get_velocity(self):
         return (self.dx,self.dy,self.dz)
-
-    def get_locList(self):
-        return self.locList
-
-    def clear(self):
-        self.locList = []

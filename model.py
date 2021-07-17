@@ -9,6 +9,8 @@ from pyglet.window import key
 import math
 import random
 from lorenz import Lorenz
+from luchen import Luchen
+from rossler import Rossler
 import sys
 
 
@@ -24,44 +26,50 @@ class Model:
             self.step += 3
             for att in range(self.attC):
                 self.attractor_list[att].step()
-                self.line_list[att].vertices[self.step-3:self.step] = self.attractor_list[att].get_location()
+                self.line_list[att].vertices[self.step-3:self.step] = [self.scale * x for x in self.attractor_list[att].get_location()]
         else:
             self.reset()
             self.step = 3
 
 
 
-    def __init__(self,attractortype="LORENZ",attC = 10):
+    def __init__(self,attractortype="LORENZ",attC = 10,scale = 1):
 
-        self.limit = 10000
+        self.limit = 1000000
         self.attC = attC
         self.lim_per_att = int(self.limit/self.attC)
+        self.scale = scale
 
-        if attractortype == "LORENZ":
 
-            self.attractor_list = []
-            self.line_list = []
-            for att in range(self.attC):
+        self.attractor_list = []
+        self.line_list = []
+        for att in range(self.attC):
 
-                x,y,z = random.random()*0.03,random.random()*0.03,random.random()*0.03
+            x,y,z = random.random()*0.03,random.random()*0.03,random.random()*0.03
 
+
+            if attractortype == "LORENZ":
                 self.attractor_list.append(Lorenz(x,y,z,0.01))
+            elif attractortype == "LUCHEN":
+                self.attractor_list.append(Luchen(x,y,z,0.01))
+            elif attractortype == "ROSSLER":
+                self.attractor_list.append(Rossler(x,y,z,0.01))
 
 
-                self.line_list.append(pyglet.graphics.vertex_list(self.lim_per_att, 'v3f/stream', 'c3B/static'))
+            self.line_list.append(pyglet.graphics.vertex_list(self.lim_per_att, 'v3f/stream', 'c3B/static'))
 
-                mult = 0.5 * (att+1)/(attC*0.7)
-                baser,baseg,baseb = 255,51,218
-                self.line_list[att].colors = (int(baser*mult), int(baseg*mult), int(baseg*mult)) * self.lim_per_att
-                #[random.randrange(0,255),random.randrange(0,255),random.randrange(0,255)]*self.lim_per_att
-                self.line_list[att].vertices[:3] = [x,y,z]
+            mult = 0.5 * (att+1)/(attC*0.7)
+            baser,baseg,baseb = 255,51,218
+            self.line_list[att].colors = (int(baser*mult), int(baseg*mult), int(baseg*mult)) * self.lim_per_att
+            #[random.randrange(0,255),random.randrange(0,255),random.randrange(0,255)]*self.lim_per_att
+            self.line_list[att].vertices[:3] = [x,y,z]
 
-            self.step = 3
+        self.step = 3
 
-            pyglet.clock.schedule_interval(self.update, 1.0/60)
+        pyglet.clock.schedule_interval(self.update, 1.0/60)
 
-        else:
-            pass
+        #else:
+        #    pass
 
     def draw(self):
         for att in range(self.attC):
@@ -148,7 +156,16 @@ class Window(pyglet.window.Window):
         self.push_handlers(self.keys)
         pyglet.clock.schedule(self.update)
 
-        self.model = Model()
+
+
+        if len(sys.argv) == 4:
+            self.model = Model(attractortype = sys.argv[1], attC = int(sys.argv[2]), scale=float(sys.argv[3]))
+        elif len(sys.argv) == 3:
+            self.model = Model(attractortype = sys.argv[1], attC = int(sys.argv[2]))
+        elif len(sys.argv) == 2:
+            self.model = Model(attractortype = sys.argv[1])
+        else:
+            self.model = Model()
         self.player = Player((0.5,1.5,1.5),(-30,0))
 
     def on_mouse_motion(self,x,y,dx,dy):

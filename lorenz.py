@@ -9,7 +9,6 @@ class Lorenz(attractor.Attractor):
         self.beta = 8/3
         self.sigma = 10
 
-        self.locList = [(x,y,z)]
 
     def step(self):
         deltax = self.dt * (self.sigma * (self.y-self.x))
@@ -19,5 +18,3 @@ class Lorenz(attractor.Attractor):
         self.x += deltax
         self.y += deltay
         self.z += deltaz
-
-        self.locList.append((self.x,self.y,self.z))
