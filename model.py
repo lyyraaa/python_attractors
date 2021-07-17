@@ -9,8 +9,16 @@ from pyglet.window import key
 import math
 import random
 from lorenz import Lorenz
-from luchen import Luchen
+from journal import Journal
 from rossler import Rossler
+from liuchen import Liuchen
+from thomas import Thomas
+from polynomial_a import Polynomial_A
+from newtonleipnik import NewtonLeipnik
+from halvorsen import Halvorsen
+from dequanli import Dequanli
+from chenlee import Chenlee
+from aizawa import Aizawa
 import sys
 
 
@@ -54,6 +62,22 @@ class Model:
                 self.attractor_list.append(Luchen(x,y,z,0.01))
             elif attractortype == "ROSSLER":
                 self.attractor_list.append(Rossler(x,y,z,0.01))
+            elif attractortype == "POLYNOMIAL_A":
+                self.attractor_list.append(Polynomial_A(x,y,z,0.01))
+            elif attractortype == "LIUCHEN":
+                self.attractor_list.append(Liuchen(x,y,z,0.01))
+            elif attractortype == "THOMAS":
+                self.attractor_list.append(Thomas(x,y,z,0.01))
+            elif attractortype == "NEWTONLEIPNIK":
+                self.attractor_list.append(NewtonLeipnik(x,y,z,0.01))
+            elif attractortype == "HALVORSEN":
+                self.attractor_list.append(Halvorsen(x,y,z,0.01))
+            elif attractortype == "DEQUANLI":
+                self.attractor_list.append(Dequanli(x,y,z,0.01))
+            elif attractortype == "CHENLEE":
+                self.attractor_list.append(Chenlee(x,y,z,0.01))
+            elif attractortype == "AIZAWA":
+                self.attractor_list.append(Aizawa(x,y,z,0.01))
 
 
             self.line_list.append(pyglet.graphics.vertex_list(self.lim_per_att, 'v3f/stream', 'c3B/static'))

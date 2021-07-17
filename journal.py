@@ -2,7 +2,7 @@ import attractor
 import math
 #https://www.hindawi.com/journals/complexity/2020/8315658/
 
-class Luchen(attractor.Attractor):
+class Journal(attractor.Attractor):
 
     def __init__(self,x,y,z,dt):
         super().__init__(x,y,z,dt)
@@ -31,3 +31,17 @@ class Luchen(attractor.Attractor):
         self.z += deltaz
         self.x4 += deltax4
         self.x5 += deltax5
+        """
+        deltax = self.dt * (self.x5 - self.rho * math.sinh(self.phi * self.z))#(self.y - self.x)
+        deltay = self.dt * (-1 * self.c * self.y - self.rho * math.sinh(self.phi * self.x4) - 5 * self.z - 5 * self.x5 - 0.1 * self.x)
+        deltaz = self.dt * (self.x4)
+        deltax4 = self.dt * (self.y)
+        deltax5 = self.dt * (self.z - self.x5)
+
+
+        self.x += deltax
+        self.y += deltay
+        self.z += deltaz
+        self.x4 += deltax4
+        self.x5 += deltax5
+        """
