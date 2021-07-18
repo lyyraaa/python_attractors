@@ -34,9 +34,9 @@ class Model:
             self.point_list[att][self.step-3:self.step] = [self.scale * x for x in self.attractor_list[att].get_location()]
             self.line_list[att].vertices = self.point_list[att][self.step:]+self.point_list[att][:self.step]
 
-    def __init__(self,attractortype="LORENZ",attC = 10,scale = 1):
+    def __init__(self,attractortype="LORENZ",attC = 50,scale = 1):
 
-        self.limit = 3000
+        self.limit = 30000
         self.attC = attC
         self.lim_per_att = int(self.limit/self.attC)
         self.scale = scale
@@ -74,18 +74,21 @@ class Model:
                 self.attractor_list.append(Aizawa(x,y,z,0.01))
 
 
-            self.line_list.append(pyglet.graphics.vertex_list(self.lim_per_att, 'v3f/stream', 'c3B/stream'))#c3B/static
+            self.line_list.append(pyglet.graphics.vertex_list(self.lim_per_att, 'v3f/stream', 'c4B/static'))#c3B/static
             self.point_list.append([0,0,0]*self.lim_per_att)
             self.point_list[att][:3] = (x,y,z)
 
             mult = 0.5 * (att+1)/(attC*0.7)
-            baser,baseg,baseb = 255,51,218
-            self.line_list[att].colors = (int(baser*mult), int(baseg*mult), int(baseg*mult)) * self.lim_per_att
-            """
-            self.colortup = (255,51,118)
-            self.line_list[att].colors = self.colortup + (0,0,0)*(self.lim_per_att-1)
-            """
-            #[random.randrange(0,255),random.randrange(0,255),random.randrange(0,255)]*self.lim_per_att
+            baser,baseg,baseb = 255,255,255#255,51,218
+
+            self.color_list = []
+            for place in range(1,self.lim_per_att+1):
+                self.color_list.append(baser)
+                self.color_list.append(baseg)
+                self.color_list.append(baseb)
+                self.color_list.append(int(255*(place/self.lim_per_att)))
+
+            self.line_list[att].colors = self.color_list
             self.line_list[att].vertices[:3] = [x,y,z]
 
         self.step = 3
@@ -213,6 +216,9 @@ class Window(pyglet.window.Window):
 
 if __name__ == '__main__':
     window = Window(width=400, height=300, caption='My caption',resizable=True)
+
+    pyglet.gl.glEnable(pyglet.gl.GL_BLEND)
+    pyglet.gl.glBlendFunc(pyglet.gl.GL_SRC_ALPHA, pyglet.gl.GL_ONE_MINUS_SRC_ALPHA)
     glClearColor(0,0,0,1)
     glEnable(GL_DEPTH_TEST)
     pyglet.app.run()
