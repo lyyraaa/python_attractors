@@ -24,33 +24,27 @@ import sys
 
 class Model:
 
-    def reset(self):
-        for att in range(self.attC):
-            self.line_list[att].vertices = [0,0,0]*self.lim_per_att
-            self.line_list[att].vertices[:3] = self.attractor_list[att].get_location()
-
     def update(self,dt):
-        if self.step < self.lim_per_att:
+        if self.step < self.lim_per_att*3:
             self.step += 3
-            for att in range(self.attC):
-                self.attractor_list[att].step()
-                self.line_list[att].vertices[self.step-3:self.step] = [self.scale * x for x in self.attractor_list[att].get_location()]
         else:
-            self.reset()
             self.step = 3
-
-
+        for att in range(self.attC):
+            self.attractor_list[att].step()
+            self.point_list[att][self.step-3:self.step] = [self.scale * x for x in self.attractor_list[att].get_location()]
+            self.line_list[att].vertices = self.point_list[att][self.step:]+self.point_list[att][:self.step]
 
     def __init__(self,attractortype="LORENZ",attC = 10,scale = 1):
 
-        self.limit = 1000000
+        self.limit = 3000
         self.attC = attC
         self.lim_per_att = int(self.limit/self.attC)
         self.scale = scale
 
-
         self.attractor_list = []
         self.line_list = []
+        self.point_list = []
+
         for att in range(self.attC):
 
             x,y,z = random.random()*0.03,random.random()*0.03,random.random()*0.03
@@ -80,11 +74,17 @@ class Model:
                 self.attractor_list.append(Aizawa(x,y,z,0.01))
 
 
-            self.line_list.append(pyglet.graphics.vertex_list(self.lim_per_att, 'v3f/stream', 'c3B/static'))
+            self.line_list.append(pyglet.graphics.vertex_list(self.lim_per_att, 'v3f/stream', 'c3B/stream'))#c3B/static
+            self.point_list.append([0,0,0]*self.lim_per_att)
+            self.point_list[att][:3] = (x,y,z)
 
             mult = 0.5 * (att+1)/(attC*0.7)
             baser,baseg,baseb = 255,51,218
             self.line_list[att].colors = (int(baser*mult), int(baseg*mult), int(baseg*mult)) * self.lim_per_att
+            """
+            self.colortup = (255,51,118)
+            self.line_list[att].colors = self.colortup + (0,0,0)*(self.lim_per_att-1)
+            """
             #[random.randrange(0,255),random.randrange(0,255),random.randrange(0,255)]*self.lim_per_att
             self.line_list[att].vertices[:3] = [x,y,z]
 
