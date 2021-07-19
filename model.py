@@ -19,6 +19,7 @@ from halvorsen import Halvorsen
 from dequanli import Dequanli
 from chenlee import Chenlee
 from aizawa import Aizawa
+import argparse
 import sys
 
 
@@ -34,12 +35,15 @@ class Model:
             self.point_list[att][self.step-3:self.step] = [self.scale * x for x in self.attractor_list[att].get_location()]
             self.line_list[att].vertices = self.point_list[att][self.step:]+self.point_list[att][:self.step]
 
-    def __init__(self,attractortype="LORENZ",attC = 50,scale = 1):
+    def __init__(self,attractortype,attC,scale,fps,limit,dt):
 
-        self.limit = 30000
+        self.attractortype = attractortype
+        self.limit = limit
         self.attC = attC
         self.lim_per_att = int(self.limit/self.attC)
         self.scale = scale
+        self.fps = fps
+        self.dt = dt
 
         self.attractor_list = []
         self.line_list = []
@@ -51,27 +55,27 @@ class Model:
 
 
             if attractortype == "LORENZ":
-                self.attractor_list.append(Lorenz(x,y,z,0.01))
+                self.attractor_list.append(Lorenz(x,y,z,self.dt))
             elif attractortype == "LUCHEN":
-                self.attractor_list.append(Luchen(x,y,z,0.01))
+                self.attractor_list.append(Luchen(x,y,z,self.dt))
             elif attractortype == "ROSSLER":
-                self.attractor_list.append(Rossler(x,y,z,0.01))
+                self.attractor_list.append(Rossler(x,y,z,self.dt))
             elif attractortype == "POLYNOMIAL_A":
-                self.attractor_list.append(Polynomial_A(x,y,z,0.01))
+                self.attractor_list.append(Polynomial_A(x,y,z,self.dt))
             elif attractortype == "LIUCHEN":
-                self.attractor_list.append(Liuchen(x,y,z,0.01))
+                self.attractor_list.append(Liuchen(x,y,z,self.dt))
             elif attractortype == "THOMAS":
-                self.attractor_list.append(Thomas(x,y,z,0.01))
+                self.attractor_list.append(Thomas(x,y,z,self.dt))
             elif attractortype == "NEWTONLEIPNIK":
-                self.attractor_list.append(NewtonLeipnik(x,y,z,0.01))
+                self.attractor_list.append(NewtonLeipnik(x,y,z,self.dt))
             elif attractortype == "HALVORSEN":
-                self.attractor_list.append(Halvorsen(x,y,z,0.01))
+                self.attractor_list.append(Halvorsen(x,y,z,self.dt))
             elif attractortype == "DEQUANLI":
-                self.attractor_list.append(Dequanli(x,y,z,0.01))
+                self.attractor_list.append(Dequanli(x,y,z,self.dt))
             elif attractortype == "CHENLEE":
-                self.attractor_list.append(Chenlee(x,y,z,0.01))
+                self.attractor_list.append(Chenlee(x,y,z,self.dt))
             elif attractortype == "AIZAWA":
-                self.attractor_list.append(Aizawa(x,y,z,0.01))
+                self.attractor_list.append(Aizawa(x,y,z,self.dt))
 
 
             self.line_list.append(pyglet.graphics.vertex_list(self.lim_per_att, 'v3f/stream', 'c4B/static'))#c3B/static
@@ -93,7 +97,7 @@ class Model:
 
         self.step = 3
 
-        pyglet.clock.schedule_interval(self.update, 1.0/60)
+        pyglet.clock.schedule_interval(self.update, 1.0/self.fps)
 
         #else:
         #    pass
@@ -176,23 +180,23 @@ class Window(pyglet.window.Window):
     lock = False
     mouse_lock = property(lambda self:self.lock, setLock)
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, arglist,*args, **kwargs):
         super().__init__(*args, **kwargs)
         self.set_minimum_size(300,200)
         self.keys = key.KeyStateHandler()
         self.push_handlers(self.keys)
         pyglet.clock.schedule(self.update)
 
+        arglist = vars(arglist)
 
+        self.model = Model(
+            attractortype = arglist.get("attractor")[0],
+            attC = arglist.get("points")[0],
+            scale= arglist.get("scale")[0],
+            fps = arglist.get("framerate")[0],
+            limit = arglist.get("limit")[0],
+            dt = arglist.get("timestep")[0])
 
-        if len(sys.argv) == 4:
-            self.model = Model(attractortype = sys.argv[1], attC = int(sys.argv[2]), scale=float(sys.argv[3]))
-        elif len(sys.argv) == 3:
-            self.model = Model(attractortype = sys.argv[1], attC = int(sys.argv[2]))
-        elif len(sys.argv) == 2:
-            self.model = Model(attractortype = sys.argv[1])
-        else:
-            self.model = Model()
         self.player = Player((0.5,1.5,1.5),(-30,0))
 
     def on_mouse_motion(self,x,y,dx,dy):
@@ -214,8 +218,40 @@ class Window(pyglet.window.Window):
         self.model.draw()
         glPopMatrix()
 
+
+
+
 if __name__ == '__main__':
-    window = Window(width=400, height=300, caption='My caption',resizable=True)
+
+    parser = argparse.ArgumentParser(description="Draws some chaotic attractors and dynamical systems")
+
+    parser.add_argument("attractor", metavar='A', type=str, nargs=1,
+        help="the attractor/system to draw, choose from:\
+        [LORENZ | \
+        AIZAWA | \
+        CHENLEE | \
+        DEQUANLI | \
+        HALVORSEN | \
+        JOURNAL | \
+        LIUCHEN | \
+        NEWTONLEIPNIK | \
+        POLYNOMIAL_A | \
+        ROSSLER | \
+        THOMAS]")
+    parser.add_argument("-p","--points",nargs=1,type=int,default=[10],
+        help="the number of points to draw, default 10")
+    parser.add_argument("-s","--scale",nargs=1,type=int,default=[1],
+        help="scale factor for size of drawing, default 1")
+    parser.add_argument("-dt","--timestep",nargs=1,type=float,default=[0.01],
+        help="timestep for calculations; delta t, default 0.01")
+    parser.add_argument("-l","--limit",nargs=1,type=int,default=[30000],
+        help="limit of number of points to draw, affects length of trails, default 30k")
+    parser.add_argument("-fps","--framerate",nargs=1,type=int,default=[60],
+        help="framerate to process at, default 60")
+    args = parser.parse_args()
+
+
+    window = Window(width=400, height=300, caption='My caption',resizable=True,arglist=args)
 
     pyglet.gl.glEnable(pyglet.gl.GL_BLEND)
     pyglet.gl.glBlendFunc(pyglet.gl.GL_SRC_ALPHA, pyglet.gl.GL_ONE_MINUS_SRC_ALPHA)
