@@ -8,17 +8,7 @@ from pyglet.gl import *
 from pyglet.window import key
 import math
 import random
-from lorenz import Lorenz
-from journal import Journal
-from rossler import Rossler
-from liuchen import Liuchen
-from thomas import Thomas
-from polynomial_a import Polynomial_A
-from newtonleipnik import NewtonLeipnik
-from halvorsen import Halvorsen
-from dequanli import Dequanli
-from chenlee import Chenlee
-from aizawa import Aizawa
+from attractor import Lorenz,Rossler,Liuchen,Thomas,NewtonLeipnik,Halvorsen,Dequanli,Aizawa
 import argparse
 import sys
 
@@ -56,12 +46,8 @@ class Model:
 
             if attractortype == "LORENZ":
                 self.attractor_list.append(Lorenz(x,y,z,self.dt))
-            elif attractortype == "LUCHEN":
-                self.attractor_list.append(Luchen(x,y,z,self.dt))
             elif attractortype == "ROSSLER":
                 self.attractor_list.append(Rossler(x,y,z,self.dt))
-            elif attractortype == "POLYNOMIAL_A":
-                self.attractor_list.append(Polynomial_A(x,y,z,self.dt))
             elif attractortype == "LIUCHEN":
                 self.attractor_list.append(Liuchen(x,y,z,self.dt))
             elif attractortype == "THOMAS":
@@ -72,10 +58,11 @@ class Model:
                 self.attractor_list.append(Halvorsen(x,y,z,self.dt))
             elif attractortype == "DEQUANLI":
                 self.attractor_list.append(Dequanli(x,y,z,self.dt))
-            elif attractortype == "CHENLEE":
-                self.attractor_list.append(Chenlee(x,y,z,self.dt))
             elif attractortype == "AIZAWA":
                 self.attractor_list.append(Aizawa(x,y,z,self.dt))
+            else:
+                print("Attractor type not recognised")
+                sys.exit(0)
 
 
             self.line_list.append(pyglet.graphics.vertex_list(self.lim_per_att, 'v3f/stream', 'c4B/static'))#c3B/static
